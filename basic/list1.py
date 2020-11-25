@@ -22,7 +22,11 @@
 # Note: python does not have a ++ operator, but += works.
 def match_ends(words):
   # +++your code here+++
-  return
+  result = 0
+  for s in words:
+    if len(s) > 1 and s[0] == s[-1]:
+      result += 1
+  return result
 
 
 # B. front_x
@@ -34,7 +38,19 @@ def match_ends(words):
 # before combining them.
 def front_x(words):
   # +++your code here+++
-  return
+  reglist = []
+  xlist = []
+  for s in words:
+    if s[0] == 'x':
+      xlist.append(s)
+    else:
+      reglist.append(s)
+
+  xlist.sort()
+  reglist.sort()
+
+  xlist.extend(reglist)
+  return xlist
 
 
 
