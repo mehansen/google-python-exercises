@@ -39,11 +39,32 @@ print_words() and print_top().
 
 import sys
 
-# +++your code here+++
-# Define print_words(filename) and print_top(filename) functions.
-# You could write a helper utility function that reads a file
-# and builds and returns a word/count dict for it.
-# Then print_words() and print_top() can just call the utility function.
+def build_dict(filename):
+  counts = {}
+  f = open(filename, 'rU')
+  for line in f:
+    cleaned_line = line.replace('--', ' ')
+    for word in cleaned_line.split(): #todo: remove punctuation?
+      counts[word.lower()] = counts.get(word.lower(), 0) + 1
+  f.close()
+
+  return counts
+
+def print_words(filename):
+	counts = build_dict(filename)
+	for key in sorted(counts.keys()):
+	  print key, counts[key]
+
+def get_count(tuple):
+	return tuple[1]
+
+def print_top(filename):
+	counts = build_dict(filename)
+	top_items = sorted(counts.items(), key=get_count)
+	top_items.reverse()
+
+	for i in top_items[:20]:
+		print i[0], i[1]
 
 ###
 
