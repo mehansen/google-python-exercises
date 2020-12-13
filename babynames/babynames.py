@@ -40,8 +40,28 @@ def extract_names(filename):
   followed by the name-rank strings in alphabetical order.
   ['2006', 'Aaliyah 91', Aaron 57', 'Abagail 895', ' ...]
   """
-  # +++your code here+++
-  return
+  f = open(filename, 'r')
+  contents = f.read()
+  f.close()
+
+  match = re.search(r'Popularity in (\d*)', contents)
+  if match:
+    year = match.group(1)
+  else:
+    print filename + ': invalid file format'
+    return []
+
+  result = []
+  matches = re.findall(r'<tr align="right"><td>(\d+)</td><td>(\w+)</td><td>(\w+)</td>', contents)
+  for match in matches:
+    # match is tuple (rank, name1, name2)
+    # print 'debug: ' + str(match)
+    result.append(match[1] + ' ' + match[0])
+    result.append(match[2] + ' ' + match[0])
+
+  result.sort()
+  result.insert(0, year)
+  return result
 
 
 def main():
@@ -60,9 +80,22 @@ def main():
     summary = True
     del args[0]
 
-  # +++your code here+++
   # For each filename, get the names, then either print the text output
   # or write it to a summary file
+  if summary:
+    f = open('summaryfile.txt', 'w')
+  
+  for arg in args:
+    extract = extract_names(arg)
+    if len(extract) > 0:
+      if summary:
+        f.write(str(extract) + '\n')
+      else:
+        print extract
+
+  if summary:
+    f.close()
+
   
 if __name__ == '__main__':
   main()
