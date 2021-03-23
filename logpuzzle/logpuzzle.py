@@ -10,6 +10,7 @@ import os
 import re
 import sys
 import urllib
+import urlparse
 
 """Logpuzzle exercise
 Given an apache logfile, find the puzzle urls and download the images.
@@ -24,8 +25,43 @@ def read_urls(filename):
   extracting the hostname from the filename itself.
   Screens out duplicate urls and returns the urls sorted into
   increasing order."""
-  # +++your code here+++
+  # hostname = filename after the underscore
+  match = re.search(r'(_)(.+)', filename)
+  if not match:
+    print 'invalid filename'
+    return []
+
+  hostname = match.group(2)
+
+  urllist = []
+
+  try:
+    f = open(filename, 'r')
+    for line in f:
+      # get path
+      match = re.search(r'(GET )(\S*)( HTTP)', line)
+      if match:
+        path = match.group(2)
+        # if string puzzle appears in path, build full url and add to list
+        if path.find('puzzle') != -1:
+          url = urlparse.urljoin('http://' + hostname, path)
+          #print 'url: ' + url
+          if url not in urllist:
+            urllist.append(url)
+    f.close()
+  except IOError:
+    sys.stderr.write('problem reading ' + filename)
   
+  return sorted(urllist, key=custom_sort_helper)
+  
+def custom_sort_helper(url):
+  #if url is in -wordchars-wordchars.jpg form, return second wordchar
+  # else return entire url
+  match = re.search(r'-\w*-(\w*).jpg$', url)
+  if match:
+    return match.group(1)
+  else :
+    return url
 
 def download_images(img_urls, dest_dir):
   """Given the urls already in the correct order, downloads
@@ -35,7 +71,23 @@ def download_images(img_urls, dest_dir):
   with an img tag to show each local image file.
   Creates the directory if necessary.
   """
-  # +++your code here+++
+  if not os.path.exists(dest_dir):
+    os.makedirs(dest_dir)
+
+  f = open(os.path.join(dest_dir, 'index.html'), 'w')
+  f.write('<verbatim>\n<html>\n<body>\n') #write instead of append
+  i = 0
+  while i < len(img_urls):
+    print 'Retrieving img' + str(i)
+    path = os.path.join(dest_dir, 'img' + str(i))
+    # retrieve image slice and save to path
+    urllib.urlretrieve(img_urls[i], path)
+    # write the reference to that path in our html file
+    f.write('<img src="' + os.path.abspath(path) + '">')
+    i = i + 1
+
+  f.write('\n</body>\n</html>')
+  f.close()
   
 
 def main():
